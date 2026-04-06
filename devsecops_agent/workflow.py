@@ -12,7 +12,7 @@ from .constants import WORKFLOW_STAGES
 from .instructions import compose_instructions, load_markdown
 from .providers import get_provider
 from .report import Finding, RunReport, now_utc_iso, score_findings, should_block, to_dict
-from .tooling import crawler, headers_scan, methods_scan, probes, tls_scan
+from .tooling import crawler, headers_scan, methods_scan, probes, source_audit, tls_scan
 
 
 @dataclass(frozen=True)
@@ -24,6 +24,8 @@ class WorkflowConfig:
     custom_mode: str
     block_threshold: int
     output_json: str
+    source_path: str = "."
+    enable_online_intel: bool = True
 
 
 def _to_finding(scanner: str, severity: str, title: str, evidence: str, rec: str) -> Finding:
@@ -130,6 +132,35 @@ def _scan_all(target: str) -> list[Finding]:
     return findings
 
 
+def _analyze_source(config: WorkflowConfig) -> list[Finding]:
+    findings: list[Finding] = []
+
+    source_issues, source_err = _safe_run_scanner(
+        "source_audit",
+        config.source_path,
+        lambda p: source_audit.run(
+            source_path=p,
+            enable_online_intel=config.enable_online_intel,
+        ),
+    )
+
+    if source_err:
+        findings.append(source_err)
+
+    for issue in source_issues:
+        findings.append(
+            _to_finding(
+                "source_audit",
+                issue.severity,
+                issue.title,
+                issue.evidence,
+                issue.recommendation,
+            )
+        )
+
+    return findings
+
+
 def run_workflow(config: WorkflowConfig, logger: Callable[[str], None] | None = None) -> RunReport:
     """Run all workflow stages in fixed order and emit a JSON report."""
 
@@ -155,13 +186,16 @@ def run_workflow(config: WorkflowConfig, logger: Callable[[str], None] | None = 
     log(f"[{workflow_id}] provider_plan={plan_response.raw_text}")
 
     log(f"[{workflow_id}] Stage: {WORKFLOW_STAGES[3]}")
-    findings = _scan_all(config.target)
+    findings = _analyze_source(config)
 
     log(f"[{workflow_id}] Stage: {WORKFLOW_STAGES[4]}")
+    findings.extend(_scan_all(config.target))
+
+    log(f"[{workflow_id}] Stage: {WORKFLOW_STAGES[5]}")
     score = score_findings(findings)
     blocked = should_block(score, config.block_threshold)
 
-    log(f"[{workflow_id}] Stage: {WORKFLOW_STAGES[5]}")
+    log(f"[{workflow_id}] Stage: {WORKFLOW_STAGES[6]}")
     report = RunReport(
         workflow_id=workflow_id,
         provider=plan_response.provider,
@@ -178,5 +212,5 @@ def run_workflow(config: WorkflowConfig, logger: Callable[[str], None] | None = 
         encoding="utf-8",
     )
 
-    log(f"[{workflow_id}] Stage: {WORKFLOW_STAGES[6]}")
+    log(f"[{workflow_id}] Stage: {WORKFLOW_STAGES[7]}")
     return report

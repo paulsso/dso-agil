@@ -22,7 +22,8 @@ class HttpResult:
 
 def ensure_url(value: str) -> str:
     if not value.startswith(("http://", "https://")):
-        value = f"https://{value}"
+        # Pre-deploy targets are expected to be local by default.
+        value = f"http://{value}"
     parsed = urlparse(value)
     if not parsed.netloc:
         raise ValueError(f"Invalid URL: {value}")

@@ -11,7 +11,11 @@ from .workflow import WorkflowConfig, run_workflow
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="DevSecOps Agent in the Loop")
-    parser.add_argument("--target", required=True, help="Target URL or hostname")
+    parser.add_argument(
+        "--target",
+        required=True,
+        help="Local pre-deploy target URL or hostname (for example: 127.0.0.1:8080)",
+    )
     parser.add_argument(
         "--provider",
         default="openai",
@@ -45,6 +49,16 @@ def build_parser() -> argparse.ArgumentParser:
         default="devsecops_report.json",
         help="Path for machine-readable report",
     )
+    parser.add_argument(
+        "--source-path",
+        default=".",
+        help="Path to application source code for JS/TS source security audit",
+    )
+    parser.add_argument(
+        "--disable-online-intel",
+        action="store_true",
+        help="Disable online vulnerability intelligence lookups (OSV)",
+    )
     return parser
 
 
@@ -60,6 +74,8 @@ def main() -> int:
         custom_mode=args.custom_mode,
         block_threshold=args.block_threshold,
         output_json=args.output_json,
+        source_path=args.source_path,
+        enable_online_intel=not args.disable_online_intel,
     )
 
     report = run_workflow(config, logger=print)

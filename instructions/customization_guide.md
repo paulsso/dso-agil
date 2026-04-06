@@ -16,7 +16,7 @@ Fully replace default policy for strict internal policy sets.
 ## Example
 Run with a custom policy appended:
 
-`devsecops-agent --target https://example.com --custom-instructions instructions/custom_instructions_example.md --custom-mode append`
+`devsecops-agent --target http://127.0.0.1:8080 --custom-instructions instructions/custom_instructions_example.md --custom-mode append`
 
 ## Recommended Practice
 - Keep base instructions generic and reusable.

@@ -75,6 +75,36 @@ CLI flags:
 - `--source-path` source directory to analyze (default `.`)
 - `--disable-online-intel` disable OSV online dependency vulnerability lookups
 
+## Standalone adversary agent (sandbox)
+
+Use `devsecops-adversary` to run an attacker-mode workflow in a local sandbox.
+
+Workflow stages:
+
+1. `LOAD_SCOPE`
+2. `GATHER_INTELLIGENCE`
+3. `GENERATE_ATTACK_HYPOTHESES`
+4. `PROBE_ENDPOINTS`
+5. `TRIAGE_ZERO_DAY_CANDIDATES`
+6. `GENERATE_REPORT`
+7. `EXIT_GATE`
+
+Capabilities:
+
+- Uses source code + runtime endpoint intelligence together.
+- Generates exploit hypotheses using selected model provider.
+- Probes endpoints for high-signal zero-day candidate behaviors (XSS/SQLi/CMDi/path traversal indicators).
+- Local-target safety by default (`localhost`/loopback only unless explicitly overridden).
+- Optional online intelligence from OSV for framework/dependency advisories.
+
+Example:
+
+`devsecops-adversary --target http://127.0.0.1:8080 --source-path . --output-json adversary_report.json`
+
+Script wrapper:
+
+- `scripts/run_adversary_agent.py`
+
 ## Security tooling scripts
 
 Individual scanners:

@@ -36,10 +36,29 @@ def _to_finding(scanner: str, severity: str, title: str, evidence: str, rec: str
     )
 
 
+def _safe_run_scanner(name: str, target: str, runner: Callable[[str], list]) -> tuple[list, Finding | None]:
+    """Run a scanner and convert runtime failures into non-blocking findings."""
+
+    try:
+        return runner(target), None
+    except Exception as exc:  # noqa: BLE001 - scanner faults are reported as findings
+        finding = _to_finding(
+            scanner=name,
+            severity="info",
+            title=f"Scanner execution error: {name}",
+            evidence=str(exc),
+            rec="Review scanner runtime error and environment connectivity.",
+        )
+        return [], finding
+
+
 def _scan_all(target: str) -> list[Finding]:
     findings: list[Finding] = []
 
-    for issue in headers_scan.run(target):
+    header_issues, header_err = _safe_run_scanner("headers_scan", target, headers_scan.run)
+    if header_err:
+        findings.append(header_err)
+    for issue in header_issues:
         findings.append(
             _to_finding(
                 "headers_scan",
@@ -50,7 +69,10 @@ def _scan_all(target: str) -> list[Finding]:
             )
         )
 
-    for issue in methods_scan.run(target):
+    method_issues, method_err = _safe_run_scanner("methods_scan", target, methods_scan.run)
+    if method_err:
+        findings.append(method_err)
+    for issue in method_issues:
         findings.append(
             _to_finding(
                 "methods_scan",
@@ -61,7 +83,10 @@ def _scan_all(target: str) -> list[Finding]:
             )
         )
 
-    for issue in tls_scan.run(target):
+    tls_issues, tls_err = _safe_run_scanner("tls_scan", target, tls_scan.run)
+    if tls_err:
+        findings.append(tls_err)
+    for issue in tls_issues:
         findings.append(
             _to_finding(
                 "tls_scan",
@@ -72,7 +97,9 @@ def _scan_all(target: str) -> list[Finding]:
             )
         )
 
-    crawled = crawler.run(target)
+    crawled, crawl_err = _safe_run_scanner("crawler", target, crawler.run)
+    if crawl_err:
+        findings.append(crawl_err)
     error_pages = [p for p in crawled if p.status_code >= 500]
     for page in error_pages:
         findings.append(
@@ -85,7 +112,10 @@ def _scan_all(target: str) -> list[Finding]:
             )
         )
 
-    for issue in probes.run(target):
+    probe_issues, probe_err = _safe_run_scanner("probes", target, probes.run)
+    if probe_err:
+        findings.append(probe_err)
+    for issue in probe_issues:
         severity = "high" if "sql" in issue.vector else "critical"
         findings.append(
             _to_finding(

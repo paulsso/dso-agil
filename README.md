@@ -46,13 +46,13 @@ Install locally:
 
 `pip install -e .`
 
-Run the full workflow:
+Run the full workflow against a local pre-deploy target:
 
-`devsecops-agent --target https://example.com --provider openai --output-json devsecops_report.json`
+`devsecops-agent --target http://127.0.0.1:8080 --provider openai --output-json devsecops_report.json`
 
 Run with custom instructions prepended:
 
-`devsecops-agent --target https://example.com --custom-instructions instructions/custom_instructions_example.md --custom-mode prepend`
+`devsecops-agent --target http://127.0.0.1:8080 --custom-instructions instructions/custom_instructions_example.md --custom-mode prepend`
 
 Exit codes:
 
@@ -71,7 +71,7 @@ Individual scanners:
 
 Combined scanner run:
 
-- `scripts/web_pentest_bundle.py --target https://example.com`
+- `scripts/web_pentest_bundle.py --target http://127.0.0.1:8080`
 
 ## Docker images
 
@@ -89,14 +89,14 @@ Example builds:
 
 Example run:
 
-`docker run --rm devsecops-agent:openai --provider openai --target https://example.com`
+`docker run --rm --network host devsecops-agent:openai --provider openai --target http://127.0.0.1:8080`
 
 ## CI/CD integration pattern
 
 Use as one job/stage:
 
 1. Build or pull image for selected provider.
-2. Run `devsecops-agent` against preview/staging target.
+2. Run `devsecops-agent` against a local pre-deploy target (for example `http://127.0.0.1:8080`).
 3. Persist `devsecops_report.json` as artifact.
 4. Fail gate automatically when command exits with code `2`.
 

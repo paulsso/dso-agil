@@ -15,7 +15,7 @@ def test_run_workflow_smoke(monkeypatch, tmp_path):
 
     out_json = tmp_path / "out.json"
     config = WorkflowConfig(
-        target="https://example.com",
+        target="http://127.0.0.1:8080",
         provider="openai",
         base_instructions_path=str(base),
         custom_instructions_path=None,

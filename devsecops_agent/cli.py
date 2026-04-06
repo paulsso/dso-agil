@@ -11,7 +11,11 @@ from .workflow import WorkflowConfig, run_workflow
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="DevSecOps Agent in the Loop")
-    parser.add_argument("--target", required=True, help="Target URL or hostname")
+    parser.add_argument(
+        "--target",
+        required=True,
+        help="Local pre-deploy target URL or hostname (for example: 127.0.0.1:8080)",
+    )
     parser.add_argument(
         "--provider",
         default="openai",

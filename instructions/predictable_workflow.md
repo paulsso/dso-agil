@@ -32,6 +32,7 @@ Execute all scanner modules in deterministic sequence:
 3. tls scanner
 4. crawler
 5. input probes
+Targets are assumed to be local pre-deploy services by default (for example `http://127.0.0.1:8080`).
 
 ### 5) RISK_SCORE
 Map findings to severities and compute aggregate score.

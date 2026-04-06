@@ -1,0 +1,26 @@
+version: "3.9"
+
+services:
+  devsecops-openai:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.openai
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - OPENAI_MODEL=${OPENAI_MODEL:-gpt-4.1-mini}
+
+  devsecops-anthropic:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.anthropic
+    environment:
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - ANTHROPIC_MODEL=${ANTHROPIC_MODEL:-claude-3-5-haiku-latest}
+
+  devsecops-meta:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.meta
+    environment:
+      - META_API_KEY=${META_API_KEY:-}
+      - META_MODEL=${META_MODEL:-llama-3.1-70b-instruct}

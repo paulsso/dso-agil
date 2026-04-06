@@ -1,0 +1,17 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    AGENT_PROVIDER=meta
+
+COPY pyproject.toml README.md /app/
+COPY devsecops_agent /app/devsecops_agent
+COPY scripts /app/scripts
+COPY instructions /app/instructions
+
+RUN pip install --no-cache-dir .
+
+ENTRYPOINT ["devsecops-agent"]
+CMD ["--provider", "meta", "--target", "https://example.com"]

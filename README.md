@@ -33,10 +33,11 @@ The workflow always runs these stages in this exact order:
 1. `LOAD_CONTEXT`
 2. `COMPOSE_INSTRUCTIONS`
 3. `PLAN_SCAN`
-4. `RUN_SCANNERS`
-5. `RISK_SCORE`
-6. `GENERATE_REPORT`
-7. `EXIT_GATE`
+4. `ANALYZE_SOURCE_CODE`
+5. `RUN_SCANNERS`
+6. `RISK_SCORE`
+7. `GENERATE_REPORT`
+8. `EXIT_GATE`
 
 See `instructions/predictable_workflow.md`.
 
@@ -48,7 +49,7 @@ Install locally:
 
 Run the full workflow against a local pre-deploy target:
 
-`devsecops-agent --target http://127.0.0.1:8080 --provider openai --output-json devsecops_report.json`
+`devsecops-agent --target http://127.0.0.1:8080 --provider openai --source-path . --output-json devsecops_report.json`
 
 Run with custom instructions prepended:
 
@@ -58,6 +59,21 @@ Exit codes:
 
 - `0` pass gate
 - `2` blocked by security risk threshold
+
+## Source-code stage (`ANALYZE_SOURCE_CODE`)
+
+This stage audits JS/TS web application source code before runtime scans:
+
+- Package-manager agnostic: detects npm/yarn/pnpm/bun markers.
+- JavaScript variant agnostic: scans `.js`, `.jsx`, `.ts`, `.tsx`, `.mjs`, `.cjs`.
+- Framework agnostic: works without requiring framework-specific parsers.
+- Framework-aware: identifies common frameworks (React/Vue/Angular/Next/Nuxt/Svelte) from dependencies and emits informational findings.
+- Online intelligence (optional): queries OSV for npm package vulnerabilities.
+
+CLI flags:
+
+- `--source-path` source directory to analyze (default `.`)
+- `--disable-online-intel` disable OSV online dependency vulnerability lookups
 
 ## Security tooling scripts
 

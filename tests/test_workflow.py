@@ -9,6 +9,7 @@ def test_run_workflow_smoke(monkeypatch, tmp_path):
     monkeypatch.setattr("devsecops_agent.workflow.tls_scan.run", lambda _: [])
     monkeypatch.setattr("devsecops_agent.workflow.crawler.run", lambda _: [])
     monkeypatch.setattr("devsecops_agent.workflow.probes.run", lambda _: [])
+    monkeypatch.setattr("devsecops_agent.workflow.source_audit.run", lambda **_: [])
 
     base = tmp_path / "base.md"
     base.write_text("base instructions", encoding="utf-8")
